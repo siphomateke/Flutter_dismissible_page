@@ -19,6 +19,9 @@ class SingleAxisDismissiblePage extends StatefulWidget {
     required this.onDragStart,
     required this.onDragEnd,
     required this.onDragUpdate,
+    required this.onGestureDetectorDragStart,
+    required this.onGestureDetectorDragEnd,
+    required this.onGestureDetectorDragUpdate,
     required this.reverseDuration,
     required this.behavior,
     Key? key,
@@ -29,6 +32,9 @@ class SingleAxisDismissiblePage extends StatefulWidget {
   final VoidCallback? onDragEnd;
   final VoidCallback onDismissed;
   final ValueChanged<double>? onDragUpdate;
+  final GestureDragStartCallback? onGestureDetectorDragStart;
+  final GestureDragEndCallback? onGestureDetectorDragEnd;
+  final GestureDragUpdateCallback? onGestureDetectorDragUpdate;
   final bool isFullScreen;
   final double minScale;
   final double minRadius;
@@ -112,6 +118,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
 
   void _handleDragStart(DragStartDetails details) {
     widget.onDragStart?.call();
+    widget.onGestureDetectorDragStart?.call(details);
     _dragUnderway = true;
     if (_moveController!.isAnimating) {
       _dragExtent =
@@ -158,8 +165,11 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
 
     if (widget.onDragUpdate != null) {
       widget.onDragUpdate?.call(
-          min(_dragExtent / context.size!.height, widget.maxTransformValue));
+        min(_dragExtent / context.size!.height, widget.maxTransformValue),
+      );
     }
+
+    widget.onGestureDetectorDragUpdate?.call(details);
 
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(() => _updateMoveAnimation());
@@ -192,6 +202,7 @@ class _SingleAxisDismissiblePageState extends State<SingleAxisDismissiblePage>
         _moveController!.reverseDuration = widget.reverseDuration;
         _moveController!.reverse();
         widget.onDragEnd?.call();
+        widget.onGestureDetectorDragEnd?.call(details);
       }
     }
   }
